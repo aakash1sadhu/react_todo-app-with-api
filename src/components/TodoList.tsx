@@ -9,7 +9,7 @@ type Props = {
   onDelete: (id: number) => void;
   onToggle: (id: number, completed: boolean) => void;
   processingId: number[];
-  onUpdate?: (todo: Todo, data: { title: string }) => Promise<void>;
+  onUpdate?: (id: number, data: { title: string }) => Promise<void>;
 };
 
 export const TodoList: React.FC<Props> = ({

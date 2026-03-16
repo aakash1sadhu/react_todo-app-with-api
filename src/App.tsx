@@ -51,7 +51,7 @@ export const App: React.FC = () => {
 
     const newTodo = {
       id: 0,
-      title: title,
+      title,
       userId: USER_ID,
       completed: false,
     };
@@ -86,16 +86,26 @@ export const App: React.FC = () => {
       });
   };
 
-  const onDeleteCompletedTodos = async () => {
-    const completedIds = todos.filter(todo => todo.completed);
+  const onDeleteCompletedTodos = () => {
+    const completed = todos.filter(todo => todo.completed);
 
-    if (completedIds.length === 0) {
+    if (completed.length === 0) {
       return;
     }
 
-    completedIds.forEach(todo => {
-      handleOnDelete(todo.id);
-    });
+    const ids = completed.map(todo => todo.id);
+    setProcessingId(prev => [...prev, ...ids]);
+
+    Promise.all(ids.map(id => deleteTodo(id)))
+      .then(() => {
+        setTodos(prev => prev.filter(todo => !ids.includes(todo.id)));
+      })
+      .catch(() => {
+        setErrorMsg(Error.Delete);
+      })
+      .finally(() => {
+        setProcessingId(prev => prev.filter(id => !ids.includes(id)));
+      });
   };
 
   const allTodosCompleted = useMemo(
@@ -125,25 +135,42 @@ export const App: React.FC = () => {
     setErrorMsg('');
 
     const status = allTodosCompleted;
-
     const activeItems = todos.filter(todo => todo.completed === status);
 
-    activeItems.forEach(todo => {
-      handleToggleTodo(todo.id, todo.completed);
-    });
+    if (activeItems.length === 0) {
+      return;
+    }
+
+    const ids = activeItems.map(todo => todo.id);
+    setProcessingId(prev => [...prev, ...ids]);
+
+    Promise.all(
+      activeItems.map(todo => updateTodo(todo.id, { completed: !status })),
+    )
+      .then(updatedTodos => {
+        setTodos(current =>
+          current.map(todo => updatedTodos.find(u => u.id === todo.id) ?? todo),
+        );
+      })
+      .catch(() => {
+        setErrorMsg(Error.Update);
+      })
+      .finally(() => {
+        setProcessingId(prev => prev.filter(id => !ids.includes(id)));
+      });
   };
 
   const handleUpdateTodo = (
-    todo: Todo,
+    id: number,
     data: { title: string },
   ): Promise<void> => {
     setErrorMsg('');
-    setProcessingId(prev => [...prev, todo.id]);
+    setProcessingId(prev => [...prev, id]);
 
-    return updateTodo(todo.id, data)
+    return updateTodo(id, data)
       .then(updatedTodo => {
         setTodos(current =>
-          current.map(item => (item.id === todo.id ? updatedTodo : item)),
+          current.map(item => (item.id === id ? updatedTodo : item)),
         );
       })
       .catch(err => {
@@ -151,7 +178,7 @@ export const App: React.FC = () => {
         throw err;
       })
       .finally(() => {
-        setProcessingId(prev => prev.filter(i => i !== todo.id));
+        setProcessingId(prev => prev.filter(i => i !== id));
       });
   };
 

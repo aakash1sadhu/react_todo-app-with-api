@@ -9,7 +9,7 @@ type Props = {
   isSubmitting: boolean;
   onDelete?: (id: number) => void;
   onToggle?: (id: number, completed: boolean) => void;
-  onUpdate?: (todo: Todo, data: { title: string }) => Promise<void>;
+  onUpdate?: (id: number, data: { title: string }) => Promise<void>;
 };
 
 export const TodoItem: React.FC<Props> = ({
@@ -46,7 +46,7 @@ export const TodoItem: React.FC<Props> = ({
       return onDelete?.(todo.id);
     }
 
-    onUpdate?.(todo, { title: trimmed })
+    onUpdate?.(todo.id, { title: trimmed })
       .then(() => {
         setIsEditing(false);
       })
