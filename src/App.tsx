@@ -1,8 +1,14 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserWarning } from './UserWarning';
-import { addTodo, deleteTodo, getTodos, updateTodo, USER_ID } from './api/todos';
+import {
+  addTodo,
+  deleteTodo,
+  getTodos,
+  updateTodo,
+  USER_ID,
+} from './api/todos';
 import { TodoHeader } from './components/TodoHeader';
 import { TodoList } from './components/TodoList';
 import { TodoFooter } from './components/TodoFooter';
@@ -35,9 +41,9 @@ export const App: React.FC = () => {
       });
   }, []);
 
-  const handleErrorClose = () => {
+  const handleErrorClose = useCallback(() => {
     setErrorMsg('');
-  };
+  }, []);
 
   const onAddTodo = (title: string) => {
     setIsSubmiting(true);
@@ -80,7 +86,7 @@ export const App: React.FC = () => {
       });
   };
 
-  const onDeleteCompletedTodos = () => {
+  const onDeleteCompletedTodos = async () => {
     const completedIds = todos.filter(todo => todo.completed);
 
     if (completedIds.length === 0) {
@@ -97,13 +103,11 @@ export const App: React.FC = () => {
     [todos],
   );
 
-  const handleToggleTodo = (todo: Todo) => {
-    const id = todo.id;
-
+  const handleToggleTodo = (id: number, completed: boolean) => {
     setProcessingId(prev => [...prev, id]);
     setErrorMsg('');
 
-    updateTodo(id, { completed: !todo.completed })
+    updateTodo(id, { completed: !completed })
       .then(updatedTodo => {
         setTodos(current =>
           current.map(item => (item.id === id ? updatedTodo : item)),
@@ -125,7 +129,7 @@ export const App: React.FC = () => {
     const activeItems = todos.filter(todo => todo.completed === status);
 
     activeItems.forEach(todo => {
-      handleToggleTodo(todo);
+      handleToggleTodo(todo.id, todo.completed);
     });
   };
 

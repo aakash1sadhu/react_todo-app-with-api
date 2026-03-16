@@ -7,7 +7,7 @@ type Props = {
   todos: Todo[];
   isLoading: boolean;
   onDelete: (id: number) => void;
-  onToggle: (todo: Todo) => void;
+  onToggle: (id: number, completed: boolean) => void;
   processingId: number[];
   onUpdate?: (todo: Todo, data: { title: string }) => Promise<void>;
 };

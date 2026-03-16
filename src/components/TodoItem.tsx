@@ -8,7 +8,7 @@ type Props = {
   todo: Todo;
   isSubmitting: boolean;
   onDelete?: (id: number) => void;
-  onToggle?: (todo: Todo) => void;
+  onToggle?: (id: number, completed: boolean) => void;
   onUpdate?: (todo: Todo, data: { title: string }) => Promise<void>;
 };
 
@@ -76,7 +76,7 @@ export const TodoItem: React.FC<Props> = ({
           type="checkbox"
           className="todo__status"
           checked={todo.completed}
-          onChange={() => onToggle?.(todo)}
+          onChange={() => onToggle?.(todo.id, todo.completed)}
         />
       </label>
 
